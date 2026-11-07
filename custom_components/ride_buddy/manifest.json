@@ -1,0 +1,20 @@
+{
+  "domain": "ride_buddy",
+  "name": "Ride Buddy",
+  "after_dependencies": [
+    "cloud"
+  ],
+  "codeowners": [
+    "@cyclbatrob"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "webhook"
+  ],
+  "documentation": "https://github.com/cyclbatrob/ride-buddy-homeassistant",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/cyclbatrob/ride-buddy-homeassistant/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

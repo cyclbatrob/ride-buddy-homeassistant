@@ -1,0 +1,26 @@
+{
+  "entity": {
+    "sensor": {
+      "odometer": { "default": "mdi:counter" },
+      "fuel": { "default": "mdi:gas-station" },
+      "fuel_left": { "default": "mdi:gas-station" },
+      "range": { "default": "mdi:map-marker-distance" },
+      "tyre_front": { "default": "mdi:tire" },
+      "tyre_rear": { "default": "mdi:tire" },
+      "battery": { "default": "mdi:car-battery" },
+      "service_due": { "default": "mdi:wrench-clock" },
+      "fault_codes": { "default": "mdi:engine-outline" },
+      "top_alert": { "default": "mdi:alert-circle-outline" },
+      "last_ride_distance": { "default": "mdi:motorbike" },
+      "last_ride_duration": { "default": "mdi:timer-outline" }
+    },
+    "binary_sensor": {
+      "chain_lube_due": { "default": "mdi:link-variant" },
+      "fault_codes_present": { "default": "mdi:engine-outline" },
+      "needs_attention": { "default": "mdi:alert-circle-outline" }
+    },
+    "event": {
+      "event": { "default": "mdi:motorbike" }
+    }
+  }
+}

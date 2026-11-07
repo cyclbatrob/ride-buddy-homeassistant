@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ride Buddy",
+        "description": "This makes a webhook for the Ride Buddy app to send your bikes' details to. With Home Assistant Cloud it works from anywhere; otherwise the phone needs to reach your Home Assistant address. Set up guide: {docs_url}"
+      },
+      "reconfigure": {
+        "title": "Ride Buddy",
+        "description": "Shows the webhook address again (it doesn't change)."
+      }
+    },
+    "create_entry": {
+      "default": "In Ride Buddy, open Settings → Connections → Home Assistant and paste this into Webhook URL:\n\n`{webhook_url}`\n\nThen tap Send test. Each bike appears as a device the first time it sends something."
+    },
+    "abort": {
+      "reconfigure_successful": "Paste this into Ride Buddy's Webhook URL:\n\n`{webhook_url}`"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "odometer": { "name": "Odometer" },
+      "fuel": { "name": "Fuel" },
+      "fuel_left": { "name": "Fuel left" },
+      "range": { "name": "Range" },
+      "tyre_front": { "name": "Front tyre" },
+      "tyre_rear": { "name": "Rear tyre" },
+      "battery": { "name": "Battery" },
+      "service_due": { "name": "Service due in" },
+      "fault_codes": { "name": "Fault codes" },
+      "top_alert": { "name": "Needs doing" },
+      "last_ride_distance": { "name": "Last ride distance" },
+      "last_ride_duration": { "name": "Last ride time" },
+      "last_update": { "name": "Last update" }
+    },
+    "binary_sensor": {
+      "chain_lube_due": { "name": "Chain lube due" },
+      "fault_codes_present": { "name": "Fault codes" },
+      "needs_attention": { "name": "Needs attention" }
+    },
+    "event": {
+      "event": {
+        "name": "Bike event",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "parked_home": "Parked at home",
+              "parked": "Parked",
+              "arriving_home": "Arriving home",
+              "fill_up": "Fill-up",
+              "alert": "Something needs doing",
+              "test": "Test"
+            }
+          }
+        }
+      }
+    }
+  }
+}
