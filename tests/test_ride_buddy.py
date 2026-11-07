@@ -123,6 +123,21 @@ async def test_older_app_message_without_bike_id(hass: HomeAssistant, hass_clien
     assert round(float(hass.states.get(entity_id).state)) == 233
 
 
+async def test_each_bike_is_its_own_device(hass: HomeAssistant, hass_client_no_auth) -> None:
+    """The app sends one message per bike (Send test sends them all)."""
+    entry, webhook_id = await _add(hass)
+    client = await hass_client_no_auth()
+    vfr = {"version": 2, "event": "test", "bike": "VFR800", "bike_id": "6B1D0E52-1C4E-4F7A-9D83-5E2A7C0F9B14",
+           "units": "miles", "fault_codes": 0, "chain_lube_due": False, "last_ride": {"km": 1.4, "mi": 0.9, "min": 3}}
+    norton = vfr | {"bike": "Norton Atlas", "bike_id": "C0A9E7F3-2B58-4D16-8E4C-71F3A2D9B605", "last_ride": {"km": 40.0, "min": 55}}
+    for message in (TIGER, vfr, norton):
+        await _post(hass, client, webhook_id, message)
+    devices = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)
+    assert sorted(d.name for d in devices) == ["Norton Atlas", "Tiger 900 Rally Pro", "VFR800"]
+    distance = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{norton['bike_id']}_last_ride_distance")
+    assert round(float(hass.states.get(distance).state), 1) == round(40.0 / 1.609344, 1)
+
+
 async def test_bad_message_is_refused(hass: HomeAssistant, hass_client_no_auth) -> None:
     entry, webhook_id = await _add(hass)
     client = await hass_client_no_auth()
