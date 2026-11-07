@@ -8,6 +8,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er
+from homeassistant.loader import async_get_integration
 from homeassistant.setup import async_setup_component
 
 from custom_components.ride_buddy import async_remove_config_entry_device
@@ -173,6 +174,12 @@ async def test_a_bike_can_be_deleted(hass: HomeAssistant, hass_client_no_auth) -
     device = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)[0]
     assert await async_remove_config_entry_device(hass, entry, device)
     assert entry.runtime_data.bikes == {}
+
+
+async def test_it_has_its_own_icon(hass: HomeAssistant) -> None:
+    """Home Assistant shows custom_components/ride_buddy/brand/icon.png for the integration."""
+    integration = await async_get_integration(hass, DOMAIN)
+    assert integration.has_branding
 
 
 async def test_bad_message_is_refused(hass: HomeAssistant, hass_client_no_auth) -> None:
