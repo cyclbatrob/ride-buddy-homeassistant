@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Ride Buddy",
-        "description": "This makes a webhook for the Ride Buddy app to send your bikes' details to. With Home Assistant Cloud it works from anywhere; otherwise the phone needs to reach your Home Assistant address. Set-up guide: https://github.com/cyclbatrob/ride-buddy-homeassistant"
+        "description": "This makes a webhook for the Ride Buddy app to send your bikes' details to. With Home Assistant Cloud it works from anywhere; otherwise the phone needs to reach your Home Assistant address."
       },
       "reconfigure": {
         "title": "Ride Buddy",

@@ -131,13 +131,16 @@ async def test_bad_message_is_refused(hass: HomeAssistant, hass_client_no_auth) 
 
 
 async def test_every_screen_gets_its_placeholders(hass: HomeAssistant) -> None:
-    """A {placeholder} with no value shows as a translation error in the dialog."""
+    """A {placeholder} with no value shows as a translation error in the dialog (and hassfest
+    refuses web addresses in the text, so they can only come in as placeholders)."""
     strings = json.loads((Path(__file__).parents[1] / "custom_components/ride_buddy/strings.json").read_text())
     def needed(text):
         return set(re.findall(r"{(\w+)}", text))
 
     await async_setup_component(hass, "homeassistant", {})
     await async_setup_component(hass, "webhook", {})
+    for text in [strings["config"]["step"]["user"]["description"], strings["config"]["create_entry"]["default"]]:
+        assert "http" not in text
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     assert needed(strings["config"]["step"]["user"]["description"]) <= set(result.get("description_placeholders") or {})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
