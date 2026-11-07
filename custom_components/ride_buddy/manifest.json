@@ -16,5 +16,5 @@
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/cyclbatrob/ride-buddy-homeassistant/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

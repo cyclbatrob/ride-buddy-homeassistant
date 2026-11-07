@@ -1,5 +1,9 @@
 """The Ride Buddy integration: setup flow, webhook messages, entities and restarts."""
 
+import json
+from pathlib import Path
+import re
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -124,6 +128,20 @@ async def test_bad_message_is_refused(hass: HomeAssistant, hass_client_no_auth) 
     client = await hass_client_no_auth()
     response = await client.post(f"/api/webhook/{webhook_id}", data="not json")
     assert response.status == 400
+
+
+async def test_every_screen_gets_its_placeholders(hass: HomeAssistant) -> None:
+    """A {placeholder} with no value shows as a translation error in the dialog."""
+    strings = json.loads((Path(__file__).parents[1] / "custom_components/ride_buddy/strings.json").read_text())
+    def needed(text):
+        return set(re.findall(r"{(\w+)}", text))
+
+    await async_setup_component(hass, "homeassistant", {})
+    await async_setup_component(hass, "webhook", {})
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    assert needed(strings["config"]["step"]["user"]["description"]) <= set(result.get("description_placeholders") or {})
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    assert needed(strings["config"]["create_entry"]["default"]) <= set(result["description_placeholders"])
 
 
 async def test_reconfigure_shows_the_url_again(hass: HomeAssistant) -> None:
