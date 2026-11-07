@@ -66,6 +66,10 @@ One device per bike (named as in the app, renamed when you rename it there), wit
 Readings the app doesn't have (tyre pressures before they're decoded, say) are left out of a
 message, and the last value is kept. Everything survives a Home Assistant restart.
 
+A bike you no longer have can be deleted from its device page (⋮ → Delete); it comes back if
+the app sends it again. A bike that an older app version sent by name only is joined onto its
+device the first time the current app sends it, keeping that device's entity ids and area.
+
 Every message is also fired on the event bus as `ride_buddy_event`, with the whole message as
 its data (plus `bike_id`).
 

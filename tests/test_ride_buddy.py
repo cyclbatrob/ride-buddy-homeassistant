@@ -7,9 +7,10 @@ import re
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er
 from homeassistant.setup import async_setup_component
 
+from custom_components.ride_buddy import async_remove_config_entry_device
 from custom_components.ride_buddy.const import DOMAIN
 
 TIGER = {
@@ -136,6 +137,42 @@ async def test_each_bike_is_its_own_device(hass: HomeAssistant, hass_client_no_a
     assert sorted(d.name for d in devices) == ["Norton Atlas", "Tiger 900 Rally Pro", "VFR800"]
     distance = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{norton['bike_id']}_last_ride_distance")
     assert round(float(hass.states.get(distance).state), 1) == round(40.0 / 1.609344, 1)
+
+
+async def test_bike_known_by_name_joins_its_id(hass: HomeAssistant, hass_client_no_auth) -> None:
+    """An app from before bike_id made a device keyed by the bike's name; the new app's message
+    makes it one device, keeping the old entity ids and the area."""
+    entry, webhook_id = await _add(hass)
+    client = await hass_client_no_auth()
+    old = {"event": "test", "bike": TIGER["bike"], "odometer_mi": 3500, "odometer_km": 5632.7, "tyre_front_psi": 33.0}
+    await _post(hass, client, webhook_id, old)
+    devices, entities = dr.async_get(hass), er.async_get(hass)
+    old_device = dr.async_entries_for_config_entry(devices, entry.entry_id)[0]
+    area = ar.async_get(hass).async_create("Motorcycles")
+    devices.async_update_device(old_device.id, area_id=area.id)
+    old_odometer = entities.async_get_entity_id("sensor", DOMAIN, "tiger_900_rally_pro_odometer")
+
+    # Both apps sent: a second device for the same bike, keyed by its id.
+    await _post(hass, client, webhook_id, {k: v for k, v in TIGER.items() if k != "tyre_front_psi"})
+    await hass.async_block_till_done()
+
+    remaining = dr.async_entries_for_config_entry(devices, entry.entry_id)
+    assert len(remaining) == 1
+    assert remaining[0].identifiers == {(DOMAIN, TIGER["bike_id"])} and remaining[0].area_id == area.id
+    odometer = _entity(hass, "sensor", "odometer")
+    assert odometer.entity_id == old_odometer == "sensor.tiger_900_rally_pro_odometer"
+    assert round(float(odometer.state)) == 3508
+    assert _entity(hass, "sensor", "tyre_front").state == "33.0"  # only the old app had sent it
+    assert set(entry.runtime_data.bikes) == {TIGER["bike_id"]}
+
+
+async def test_a_bike_can_be_deleted(hass: HomeAssistant, hass_client_no_auth) -> None:
+    entry, webhook_id = await _add(hass)
+    client = await hass_client_no_auth()
+    await _post(hass, client, webhook_id, TIGER)
+    device = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)[0]
+    assert await async_remove_config_entry_device(hass, entry, device)
+    assert entry.runtime_data.bikes == {}
 
 
 async def test_bad_message_is_refused(hass: HomeAssistant, hass_client_no_auth) -> None:
